@@ -15,7 +15,7 @@ export async function POST(req) {
   const pc = new Pinecone({
     apiKey: process.env.PINECONE_API_KEY,
   });
-  const index = pc.index('rag').namespace('ns1');
+  const index = pc.index('quickstart');
 
   // Initialize Together API client
   const together = new Together({ apiKey: process.env.TOGETHER_API_KEY });
@@ -24,15 +24,15 @@ export async function POST(req) {
     const text = data[data.length - 1].content;
 
     // Create embedding using Together API
-    const embeddingResponse = await together.createEmbedding({
-      model: 'together-embedding-ada-002',
+    const embeddingResponse = await together.chat.completions.create({ // Adjust method name if needed
+      model: 'meta-llama-3.1-405b-instruct',
       input: text,
     });
 
     const results = await index.query({
       topK: 5,
       includeMetadata: true,
-      vector: embeddingResponse.data[0].embedding,
+      vector: embeddingResponse.embedding, // Adjust response structure if needed
     });
 
     let resultString = '';
